@@ -27,26 +27,34 @@ function is_git_repo()
 function initiate() #TODO
 {
 	if [ -e $KERNEL_SRC_PATH/.kdump-auto-bisect.undergo ]; then
-		echo $'\nThere might be another operation undergoing, if you want to start again, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n'
+		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n'
 		exit -1
 	fi
-	read -p "This operatin will clear '/var/crash', continue?(y/n)" ans
+    # TODO efi
+    if [ -d /sys/firmware/efi ]; then
+	    read -p "EFI is not well supported, continue?(y/n)" ans
+	    if [ ! $ans = "y" ]; then
+		    echo Abort
+		    exit -1
+	    fi
+    fi
+	read -p "This operatin will clear contents in '/var/crash', continue?(y/n)" ans
 	if [ $ans = "n" ]; then
 		echo Abort
 		exit -1
 	fi
 	rm -rf /var/crash/*
-	read -p "You are requried to edit grub.cfg file, to add a booting entry for your kernel  2) make sure 'crashkernel=xxxM' is added. Hit 'y' if you have modified grub.cfg (y/n)" ans
-	if [ ! $ans = "y" ]; then
-		echo Abort
-		exit 0
-	fi
-	echo "select your booting entry:"
-	/usr/bin/select-default-grub-entry.sh
-	read -p "Now provide the suffix of your kernel/initramfs.img, which is the string after 'vmlinuz-' of your kernel/initramfs.img:" KERNEL_SUFFIX
+#   read -p "You are requried to edit grub.cfg file, to add a booting entry for your kernel  2) make sure 'crashkernel=xxxM' is added. Hit 'y' if you have modified grub.cfg (y/n)" ans
+#	if [ ! $ans = "y" ]; then
+#		echo Abort
+#		exit 0
+#	fi
+#	echo "select your booting entry:"
+#	/usr/bin/select-default-grub-entry.sh
+#	read -p "Now provide the suffix of your kernel/initramfs.img, which is the string after 'vmlinuz-' of your kernel/initramfs.img:" KERNEL_SUFFIX
 	touch $KERNEL_SRC_PATH"/.kdump-auto-bisect.undergo"
-	touch /boot/vmlinuz-$KERNEL_SUFFIX
-	touch /boot/initramfs-${KERNEL_SUFFIX}.img #TODO
+#	touch /boot/vmlinuz-$KERNEL_SUFFIX
+#	touch /boot/initramfs-${KERNEL_SUFFIX}.img
 	git bisect reset
 	git bisect start
 	echo good at $1
@@ -58,22 +66,21 @@ function initiate() #TODO
 # TODO you might want to modified this function to suit your own machine
 function kernel_compile_install() #TODO
 {
+    #TODO threading according to /proc/cpuinfo
 	yes $'\n' | make oldconfig && \
 	make -j2 && \
 	make -j2 modules && \
 	make modules_install && \
 	make install
-	# we do not count on that unstable 'make install' command
-	# we will do some of its work manually
 	# notice that next reboot should use new kernel
+    for i in `ls -alt /boot/vmlinuz* | head -n 3 | cut -d " " -f 10 | cut -d "-" -f 2 `; do new_boot_entry="Fedora ($i) 24 (Workstation Edition)"; break; done
+    grub2-set-default "$new_boot_entry"
 	#rm /boot/vmlinuz
 	#newkernel=`ls -alt /boot/vmlinuz* | head -n 1 | cut -d " " -f 10`
 	#echo "error! empty string" | esmtp $REPORT_EMAIL
 	#mv -f $newkernel /boot/vmlinuz-$KERNEL_SUFFIX
 	#newinitramfs=`ls -alt /boot/initramfs* | head -n 1 | cut -d " " -f 9`
 	#echo "error! empty string" | esmtp $REPORT_EMAIL
-	#mv -f $newinitramfs /boot/initramfs-${KERNEL_SUFFIX}.img
-
 	touch $KERNEL_SRC_PATH"/.kdump-auto-bisect.reboot"
 }
 
