@@ -1,0 +1,13 @@
+[Unit]
+Description=kdump-auto-bisect daemon
+After=network.target network-online.target remote-fs.target basic.target kdump.service 
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/kab-daemon.sh
+RemainAfterExit=yes
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

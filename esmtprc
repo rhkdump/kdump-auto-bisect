@@ -1,0 +1,8 @@
+identity kdump-auto-bisect
+	hostname =  smtp.corp.xxx.com:25
+	username = ""
+	password = ""
+	starttls = disabled
+	default
+
+mda = "/usr/bin/procmail -d %T" 
