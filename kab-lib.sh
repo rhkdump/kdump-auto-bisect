@@ -26,7 +26,7 @@ function is_git_repo()
 
 function initiate() #TODO
 {
-	if [ -e $KERNEL_SRC_PATH/.kdump-auto-bisect.undergo ]; then
+	if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo ]; then
 		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n'
 		exit -1
 	fi
@@ -52,7 +52,7 @@ function initiate() #TODO
 #	echo "select your booting entry:"
 #	/usr/bin/select-default-grub-entry.sh
 #	read -p "Now provide the suffix of your kernel/initramfs.img, which is the string after 'vmlinuz-' of your kernel/initramfs.img:" KERNEL_SUFFIX
-	touch $KERNEL_SRC_PATH"/.kdump-auto-bisect.undergo"
+	touch "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo"
 #	touch /boot/vmlinuz-$KERNEL_SUFFIX
 #	touch /boot/initramfs-${KERNEL_SUFFIX}.img
 	git bisect reset
@@ -81,14 +81,14 @@ function kernel_compile_install() #TODO
 	#mv -f $newkernel /boot/vmlinuz-$KERNEL_SUFFIX
 	#newinitramfs=`ls -alt /boot/initramfs* | head -n 1 | cut -d " " -f 9`
 	#echo "error! empty string" | esmtp $REPORT_EMAIL
-	touch $KERNEL_SRC_PATH"/.kdump-auto-bisect.reboot"
+	touch "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot"
 }
 
 success_string=''
 
 function detect_good_bad()
 {
-	if [ -e /var/crash/* ];then
+	if [ `ls /var/crash | wc -l` -ne 0 ];then
 		echo good
 		success_string=`git bisect good | grep "is the first bad commit"`
 		rm -rf /var/crash/*
@@ -144,7 +144,7 @@ function which_kernel()
 }	
 
 ## only for the first run
-#if [ ! -e $KERNEL_SRC_PATH"/.kdump-auto-bisect.undergo" ]; then
+#if [ ! -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo" ]; then
 #	are_you_root
 #	is_git_repo
 #	initiate
@@ -154,8 +154,8 @@ function which_kernel()
 #fi
 #
 ## only for the reboot after kernel installation
-#if [ -e $KERNEL_SRC_PATH"/.kdump-auto-bisect.reboot" ]; then
-#	rm -f $KERNEL_SRC_PATH"/.kdump-auto-bisect.reboot"
+#if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot" ]; then
+#	rm -f "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot"
 #	trigger_pannic
 #	exit 0
 #fi
@@ -168,7 +168,7 @@ function which_kernel()
 #ret=$?
 #if [ "$ret" == 1 ]; then
 #	success_report
-#	rm -f $KERNEL_SRC_PATH"/.kdump-auto-bisect.undergo"
+#	rm -f "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo"
 #else
 #	kernel_compile_install
 #	do_test

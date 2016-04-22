@@ -9,8 +9,8 @@ if [ $kernel == 2 ]; then
 fi
 
 # only for the reboot after kernel installation
-if [ -e $KERNEL_SRC_PATH"/.kdump-auto-bisect.reboot" ]; then
-	rm -f $KERNEL_SRC_PATH"/.kdump-auto-bisect.reboot"
+if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot" ]; then
+	rm -f "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot" && \
 	trigger_pannic
 	exit 0
 fi
@@ -23,7 +23,8 @@ can_we_stop
 ret=$?
 if [ "$ret" == 1 ]; then
 	success_report
-	rm -f $KERNEL_SRC_PATH"/.kdump-auto-bisect.undergo"
+    git bisect reset
+	rm -f "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo"
 else
 	kernel_compile_install
 	do_test
