@@ -26,8 +26,8 @@ function is_git_repo()
 
 function initiate() #TODO
 {
-	if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo ]; then
-		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n'
+	if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo" ]; then
+		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n';
 		exit -1
 	fi
     # TODO efi
