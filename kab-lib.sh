@@ -74,7 +74,8 @@ function initiate() #TODO
 function kernel_compile_install() #TODO
 {
     #TODO threading according to /proc/cpuinfo
-	LOG building kernel
+    CURRENT_COMMIT=`git log --oneline | cut -d ' ' -f 1 | head -n 1`
+	LOG building kernel: ${CURRENT_COMMIT}
 	yes $'\n' | make oldconfig && \
 	make -j2 && \
 	make -j2 modules && \
