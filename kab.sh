@@ -1,7 +1,8 @@
 #!/bin/bash
 
-. kab-lib.sh
+source /usr/bin/kab-lib.sh
 
+LOG "kab start"
 are_you_root
 is_git_repo
 initiate $1 $2

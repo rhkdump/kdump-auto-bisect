@@ -7,6 +7,12 @@ KERNEL_SRC_PATH='/home/freeman/project/linux/'
 KERNEL_SUFFIX='kdump-auto-bisect' 
 # mail-box to recieve report
 REPORT_EMAIL='zhangzhengyu@ncic.ac.cn'
+LOG_PATH='/home/freeman/project/kdump-auto-bisect/log'
+
+function LOG()
+{
+	echo "`date +%b%d:%H:%M:%S` - $@">> ${LOG_PATH}
+}
 
 function are_you_root()
 {
@@ -26,7 +32,7 @@ function is_git_repo()
 
 function initiate() #TODO
 {
-	if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo" ]; then
+	if [ -e "/etc/.kdump-auto-bisect.undergo" ]; then
 		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n';
 		exit -1
 	fi
@@ -52,13 +58,14 @@ function initiate() #TODO
 #	echo "select your booting entry:"
 #	/usr/bin/select-default-grub-entry.sh
 #	read -p "Now provide the suffix of your kernel/initramfs.img, which is the string after 'vmlinuz-' of your kernel/initramfs.img:" KERNEL_SUFFIX
-	touch "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo"
+	touch "/etc/.kdump-auto-bisect.undergo"
 #	touch /boot/vmlinuz-$KERNEL_SUFFIX
 #	touch /boot/initramfs-${KERNEL_SUFFIX}.img
 	git bisect reset
+	LOG bisect restarting
 	git bisect start
-	echo good at $1
-	echo bad at $2
+	LOG good at $1
+	LOG bad at $2
 	git bisect good $1
 	git bisect bad $2
 }
@@ -67,21 +74,25 @@ function initiate() #TODO
 function kernel_compile_install() #TODO
 {
     #TODO threading according to /proc/cpuinfo
+	LOG building kernel
 	yes $'\n' | make oldconfig && \
 	make -j2 && \
 	make -j2 modules && \
 	make modules_install && \
 	make install
+	LOG kernel building complete
 	# notice that next reboot should use new kernel
     for i in `ls -alt /boot/vmlinuz* | head -n 3 | cut -d " " -f 10 | cut -d "-" -f 2 `; do new_boot_entry="Fedora ($i) 24 (Workstation Edition)"; break; done
     grub2-set-default "$new_boot_entry"
+	LOG select new kernel "$new_boot_entry"
 	#rm /boot/vmlinuz
 	#newkernel=`ls -alt /boot/vmlinuz* | head -n 1 | cut -d " " -f 10`
 	#echo "error! empty string" | esmtp $REPORT_EMAIL
 	#mv -f $newkernel /boot/vmlinuz-$KERNEL_SUFFIX
 	#newinitramfs=`ls -alt /boot/initramfs* | head -n 1 | cut -d " " -f 9`
 	#echo "error! empty string" | esmtp $REPORT_EMAIL
-	touch "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot"
+	touch "/etc/.kdump-auto-bisect.reboot"
+	LOG reboot file created
 }
 
 success_string=''
@@ -89,11 +100,12 @@ success_string=''
 function detect_good_bad()
 {
 	if [ `ls /var/crash | wc -l` -ne 0 ];then
-		echo good
+		LOG good
 		success_string=`git bisect good | grep "is the first bad commit"`
 		rm -rf /var/crash/*
+		LOG remove /var/crash/*
 	else
-		echo bad
+		LOG bad
 		success_string=`git bisect bad | grep "is the first bad commit"`
 	fi
 }
@@ -110,6 +122,7 @@ function can_we_stop()
 function do_test()
 {
 	# real test happens after reboot
+	LOG rebooting
 	reboot
 }
 
@@ -123,6 +136,13 @@ function success_report()
 function enable_service()
 {
 	systemctl enable kdump-auto-bisect
+	LOG kab service enabled
+}
+
+function disable_service()
+{
+	systemctl disable kdump-auto-bisect
+	LOG kab service disabled
 }
 
 # utilities for testing kdump
@@ -144,7 +164,7 @@ function which_kernel()
 }	
 
 ## only for the first run
-#if [ ! -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo" ]; then
+#if [ ! -e "/etc/.kdump-auto-bisect.undergo" ]; then
 #	are_you_root
 #	is_git_repo
 #	initiate
@@ -154,8 +174,8 @@ function which_kernel()
 #fi
 #
 ## only for the reboot after kernel installation
-#if [ -e "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot" ]; then
-#	rm -f "${KERNEL_SRC_PATH}/.kdump-auto-bisect.reboot"
+#if [ -e "/etc/.kdump-auto-bisect.reboot" ]; then
+#	rm -f "/etc/.kdump-auto-bisect.reboot"
 #	trigger_pannic
 #	exit 0
 #fi
@@ -168,7 +188,7 @@ function which_kernel()
 #ret=$?
 #if [ "$ret" == 1 ]; then
 #	success_report
-#	rm -f "${KERNEL_SRC_PATH}/.kdump-auto-bisect.undergo"
+#	rm -f "/etc/.kdump-auto-bisect.undergo"
 #else
 #	kernel_compile_install
 #	do_test
