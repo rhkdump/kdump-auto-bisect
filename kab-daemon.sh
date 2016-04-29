@@ -13,9 +13,9 @@ fi
 LOG entering 1st kernel
 echo world >> /home/freeman/project/kdump-auto-bisect/log.txt
 # only for the reboot after kernel installation
-if [ -e "/etc/.kdump-auto-bisect.reboot" ]; then
+if [ -e "/boot/.kdump-auto-bisect.reboot" ]; then
 	LOG reboot-file detected
-	rm -f "/etc/.kdump-auto-bisect.reboot" && \
+	rm -f "/boot/.kdump-auto-bisect.reboot"
 	LOG reboot-file removed
 	LOG triggering panic
 	trigger_pannic
@@ -35,7 +35,7 @@ if [ "$ret" == 1 ]; then
 	LOG stoping
 	success_report
 	LOG report sent
-	rm -f "/etc/.kdump-auto-bisect.undergo"
+	rm -f "/boot/.kdump-auto-bisect.undergo"
 	disable_service
 	LOG stoped
 else

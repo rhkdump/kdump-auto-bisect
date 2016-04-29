@@ -3,11 +3,9 @@
 # TODO create a configfile for these
 # path to kernel source directory
 KERNEL_SRC_PATH='/home/freeman/project/linux/'
-# match the name in grub.cfg
-KERNEL_SUFFIX='kdump-auto-bisect' 
 # mail-box to recieve report
 REPORT_EMAIL='zhangzhengyu@ncic.ac.cn'
-LOG_PATH='/home/freeman/project/kdump-auto-bisect/log'
+LOG_PATH='/boot/.kdump-auto-bisect.log'
 
 function LOG()
 {
@@ -32,7 +30,7 @@ function is_git_repo()
 
 function initiate() #TODO
 {
-	if [ -e "/etc/.kdump-auto-bisect.undergo" ]; then
+	if [ -e "/boot/.kdump-auto-bisect.undergo" ]; then
 		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n';
 		exit -1
 	fi
@@ -58,7 +56,7 @@ function initiate() #TODO
 #	echo "select your booting entry:"
 #	/usr/bin/select-default-grub-entry.sh
 #	read -p "Now provide the suffix of your kernel/initramfs.img, which is the string after 'vmlinuz-' of your kernel/initramfs.img:" KERNEL_SUFFIX
-	touch "/etc/.kdump-auto-bisect.undergo"
+	touch "/boot/.kdump-auto-bisect.undergo"
 #	touch /boot/vmlinuz-$KERNEL_SUFFIX
 #	touch /boot/initramfs-${KERNEL_SUFFIX}.img
 	git bisect reset
@@ -83,16 +81,20 @@ function kernel_compile_install() #TODO
 	make install
 	LOG kernel building complete
 	# notice that next reboot should use new kernel
-    for i in `ls -alt /boot/vmlinuz* | head -n 3 | cut -d " " -f 10 | cut -d "-" -f 2 `; do new_boot_entry="Fedora ($i) 24 (Workstation Edition)"; break; done
-    grub2-set-default "$new_boot_entry"
-	LOG select new kernel "$new_boot_entry"
-	#rm /boot/vmlinuz
-	#newkernel=`ls -alt /boot/vmlinuz* | head -n 1 | cut -d " " -f 10`
-	#echo "error! empty string" | esmtp $REPORT_EMAIL
-	#mv -f $newkernel /boot/vmlinuz-$KERNEL_SUFFIX
-	#newinitramfs=`ls -alt /boot/initramfs* | head -n 1 | cut -d " " -f 9`
-	#echo "error! empty string" | esmtp $REPORT_EMAIL
-	touch "/etc/.kdump-auto-bisect.reboot"
+    	grubby --set-default-index=0
+	# TODO log which kernel
+	# for i in `ls -alt /boot/vmlinuz* | head -n 3 | cut -d " " -f 10 | cut -d "-" -f 2 `; do new_boot_entry="Fedora ($i) 24 (Workstation Edition)"; break; done
+	# new_kernel_version=`ls -l /boot/vmlinuz | cut -d " " -f 11 | cut -d "-" -f 2`
+	# new_boot_entry="Fedora ($new_kernel_version) 23 (Workstation Edition)" # TODO
+    	# grub2-set-default "$new_boot_entry"
+	# LOG select new kernel "$new_boot_entry"
+	# rm /boot/vmlinuz
+	# newkernel=`ls -alt /boot/vmlinuz* | head -n 1 | cut -d " " -f 10`
+	# echo "error! empty string" | esmtp $REPORT_EMAIL
+	# mv -f $newkernel /boot/vmlinuz-$KERNEL_SUFFIX
+	# newinitramfs=`ls -alt /boot/initramfs* | head -n 1 | cut -d " " -f 9`
+	# echo "error! empty string" | esmtp $REPORT_EMAIL
+	touch "/boot/.kdump-auto-bisect.reboot"
 	LOG reboot file created
 }
 
@@ -150,8 +152,10 @@ function disable_service()
 function trigger_pannic()
 {
 	# it is dangerous not to check kdump service status TODO
-	systemctl start kdump && \
-	echo 1 > /proc/sys/kernel/sysrq && \
+	kdump_status=`kdumpctl status`
+	LOG ${kdump_status}
+	sleep 5
+	echo 1 > /proc/sys/kernel/sysrq
 	echo c > /proc/sysrq-trigger
 }
 
@@ -163,35 +167,3 @@ function which_kernel()
 		echo 1
 	fi
 }	
-
-## only for the first run
-#if [ ! -e "/etc/.kdump-auto-bisect.undergo" ]; then
-#	are_you_root
-#	is_git_repo
-#	initiate
-#	kernel_compile_install
-#	do_test
-#	exit 0
-#fi
-#
-## only for the reboot after kernel installation
-#if [ -e "/etc/.kdump-auto-bisect.reboot" ]; then
-#	rm -f "/etc/.kdump-auto-bisect.reboot"
-#	trigger_pannic
-#	exit 0
-#fi
-#
-## only for the reboot after crash
-#cd $KERNEL_SRC_PATH
-#
-#detect_good_bad
-#can_we_stop
-#ret=$?
-#if [ "$ret" == 1 ]; then
-#	success_report
-#	rm -f "/etc/.kdump-auto-bisect.undergo"
-#else
-#	kernel_compile_install
-#	do_test
-#fi
-#cd -
