@@ -31,7 +31,12 @@ function is_git_repo()
 function initiate() #TODO
 {
 	if [ -e "/boot/.kdump-auto-bisect.undergo" ]; then
-		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in kernel source directory and run this script again.\n';
+		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in /boot directory and run this script again.\n';
+		exit -1
+	fi
+	read -p "Make sure kdump works in current system, continue?(y/n)" ans
+	if [ ! $ans = "y" ]; then
+		echo Abort
 		exit -1
 	fi
     # TODO efi
