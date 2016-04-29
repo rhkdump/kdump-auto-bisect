@@ -6,10 +6,16 @@ KERNEL_SRC_PATH='/home/freeman/project/linux/'
 # mail-box to recieve report
 REPORT_EMAIL='zhangzhengyu@ncic.ac.cn'
 LOG_PATH='/boot/.kdump-auto-bisect.log'
+REMOTE_LOG_PATH='/var/.kdump-auto-bisect.log'
+# remote host who will receive logs.
+LOG_HOST='10.66.128.17'
 
 function LOG()
 {
 	echo "`date +%b%d:%H:%M:%S` - $@">> ${LOG_PATH}
+    if [ ! -z ${LOG_HOST} ]; then
+	    ssh root@${LOG_HOST} "echo "`date +%b%d:%H:%M:%S` - $@">> ${REMOTE_LOG_PATH}"
+    fi
 }
 
 function are_you_root()
@@ -53,17 +59,16 @@ function initiate() #TODO
 		exit -1
 	fi
 	rm -rf /var/crash/*
-#   read -p "You are requried to edit grub.cfg file, to add a booting entry for your kernel  2) make sure 'crashkernel=xxxM' is added. Hit 'y' if you have modified grub.cfg (y/n)" ans
-#	if [ ! $ans = "y" ]; then
-#		echo Abort
-#		exit 0
-#	fi
-#	echo "select your booting entry:"
-#	/usr/bin/select-default-grub-entry.sh
-#	read -p "Now provide the suffix of your kernel/initramfs.img, which is the string after 'vmlinuz-' of your kernel/initramfs.img:" KERNEL_SUFFIX
+    if [ -z ${LOG_HOST} ]; then
+        echo "you can check logs in /boot/.kdump-auto-bisect.log"
+    else
+        echo "or at /var directory in ${LOG_HOST}"
+        ssh-keygen
+        ssh-copy-id -f root@${LOG_HOST}
+        LOG using remote log
+    fi
+    LOG starting kab
 	touch "/boot/.kdump-auto-bisect.undergo"
-#	touch /boot/vmlinuz-$KERNEL_SUFFIX
-#	touch /boot/initramfs-${KERNEL_SUFFIX}.img
 	git bisect reset
 	LOG bisect restarting
 	git bisect start
