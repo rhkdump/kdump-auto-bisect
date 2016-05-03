@@ -11,7 +11,6 @@ if [ $kernel == 2 ]; then
 fi
 
 LOG entering 1st kernel
-echo world >> /home/freeman/project/kdump-auto-bisect/log.txt
 # only for the reboot after kernel installation
 if [ -e "/boot/.kdump-auto-bisect.reboot" ]; then
 	LOG reboot-file detected

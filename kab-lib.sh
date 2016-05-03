@@ -1,12 +1,17 @@
 # !/bin/bash
 
 # TODO create a configfile for these
+
 # path to kernel source directory
 KERNEL_SRC_PATH='/home/freeman/project/linux/'
+
 # mail-box to recieve report
-REPORT_EMAIL='zhangzhengyu@ncic.ac.cn'
+REPORT_EMAIL=''
+
 LOG_PATH='/boot/.kdump-auto-bisect.log'
+
 REMOTE_LOG_PATH='/var/.kdump-auto-bisect.log'
+
 # remote host who will receive logs.
 LOG_HOST='10.66.128.17'
 
@@ -34,7 +39,7 @@ function is_git_repo()
 	fi
 }
 
-function initiate() #TODO
+function initiate()
 {
 	if [ -e "/boot/.kdump-auto-bisect.undergo" ]; then
 		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in /boot directory and run this script again.\n';
@@ -78,8 +83,8 @@ function initiate() #TODO
 	git bisect bad $2
 }
 
-# TODO you might want to modified this function to suit your own machine
-function kernel_compile_install() #TODO
+# you might want to modified this function to suit your own machine
+function kernel_compile_install() 
 {
     #TODO threading according to /proc/cpuinfo
     CURRENT_COMMIT=`git log --oneline | cut -d ' ' -f 1 | head -n 1`
@@ -92,18 +97,6 @@ function kernel_compile_install() #TODO
 	LOG kernel building complete
 	# notice that next reboot should use new kernel
     	grubby --set-default-index=0
-	# TODO log which kernel
-	# for i in `ls -alt /boot/vmlinuz* | head -n 3 | cut -d " " -f 10 | cut -d "-" -f 2 `; do new_boot_entry="Fedora ($i) 24 (Workstation Edition)"; break; done
-	# new_kernel_version=`ls -l /boot/vmlinuz | cut -d " " -f 11 | cut -d "-" -f 2`
-	# new_boot_entry="Fedora ($new_kernel_version) 23 (Workstation Edition)" # TODO
-    	# grub2-set-default "$new_boot_entry"
-	# LOG select new kernel "$new_boot_entry"
-	# rm /boot/vmlinuz
-	# newkernel=`ls -alt /boot/vmlinuz* | head -n 1 | cut -d " " -f 10`
-	# echo "error! empty string" | esmtp $REPORT_EMAIL
-	# mv -f $newkernel /boot/vmlinuz-$KERNEL_SUFFIX
-	# newinitramfs=`ls -alt /boot/initramfs* | head -n 1 | cut -d " " -f 9`
-	# echo "error! empty string" | esmtp $REPORT_EMAIL
 	touch "/boot/.kdump-auto-bisect.reboot"
 	LOG reboot file created
 }
