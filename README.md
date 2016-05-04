@@ -39,10 +39,10 @@ You may want to modify 'kernel_compile_install' in kab-lib.sh if common
 compilation and installation precedure cannot satisfy your amazing systems.
 
 You may want to modify 'detect_good_bad' in kab-lib.sh if the existence of
-/var/crash/* is not your standard to judge good commits or bad ones.
+/var/crash/ is not your standard to judge good commits or bad ones.
 
 This script is crappy but somewhat comprehensive. You can update any part of it.
 You can send me your modification if you want to. Any other feedbacks are also
 welcome.
 
-Freeman <freeman.zhang1992@gmail.com>
+<freeman.zhang1992@gmail.com>
