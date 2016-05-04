@@ -42,7 +42,12 @@ function is_git_repo()
 function initiate()
 {
 	if [ -e "/boot/.kdump-auto-bisect.undergo" ]; then
-		echo $'\nThere might be another operation undergoing, if you want to start over, delete any file named '.kdump-auto-bisect.*' in /boot directory and run this script again.\n';
+		echo '''
+        
+There might be another operation undergoing, delete any file named
+'.kdump-auto-bisect.*' in /boot directory and run this script again.
+
+'''
 		exit -1
 	fi
 	read -p "Make sure kdump works in current system, continue?(y/n)" ans
@@ -58,7 +63,7 @@ function initiate()
 		    exit -1
 	    fi
     fi
-	read -p "This operatin will clear contents in '/var/crash', continue?(y/n)" ans
+	read -p "This will clear contents in '/var/crash', continue?(y/n)" ans
 	if [ $ans = "n" ]; then
 		echo Abort
 		exit -1
