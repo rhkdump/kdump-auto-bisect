@@ -2,6 +2,7 @@
 
 source /usr/bin/kab-lib.sh
 
+check_config
 are_you_root
 is_git_repo
 initiate $1 $2

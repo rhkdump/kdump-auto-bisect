@@ -2,6 +2,7 @@
 
 # DO NOT execute this script manually!
 source /usr/bin/kab-lib.sh
+check_config
 LOG reboot complete
 # we don't care about 2nd kernel, just in case
 kernel=`which_kernel`
@@ -24,6 +25,7 @@ fi
 # only for the reboot after crash
 LOG reboot from crash
 cd $KERNEL_SRC_PATH
+LOG now in $KERNEL_SRC_PATH
 
 LOG detecting good or bad
 detect_good_bad

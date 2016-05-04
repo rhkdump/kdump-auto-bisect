@@ -1,19 +1,47 @@
 # !/bin/bash
 
-# TODO create a configfile for these
-
+CONFIG_FILE='/etc/kdump-auto-bisect.conf'
 # path to kernel source directory
-KERNEL_SRC_PATH='/home/freeman/project/linux/'
-
+KERNEL_SRC_PATH=''
 # mail-box to recieve report
 REPORT_EMAIL=''
-
-LOG_PATH='/boot/.kdump-auto-bisect.log'
-
-REMOTE_LOG_PATH='/var/.kdump-auto-bisect.log'
-
+LOG_PATH=''
+REMOTE_LOG_PATH=''
 # remote host who will receive logs.
-LOG_HOST='10.66.128.17'
+LOG_HOST=''
+
+function check_config()
+{
+    while read config_opt config_val; do
+        config_val_striped=`echo ${config_val} | sed -e 's/\(.*\)#.*/\1/'`
+        case "$config_opt" in
+        \#* | "")
+             ;;
+        KERNEL_SRC_PATH)
+            echo KERNEL_SRC_PATH set to ${config_val_striped}
+            KERNEL_SRC_PATH=${config_val_striped}
+            ;;
+        LOG_PATH)
+            echo LOG_PATH set to ${config_val_striped}
+            LOG_PATH=${config_val_striped}
+            ;;
+        LOG_HOST)
+            echo LOG_HOST set to ${config_val_striped}
+            LOG_HOST=${config_val_striped}
+            ;;
+        REMOTE_LOG_PATH)
+            echo REMOTE_LOG_PATH set to ${config_val_striped}
+            REMOTE_LOG_PATH=${config_val_striped}
+            ;;
+        REPORT_EMAIL)
+            echo REPORT_EMAIL set to ${config_val_striped}
+            REPORT_EMAIL=${config_val_striped}
+            ;;
+        *)
+            ;;
+        esac
+    done < ${CONFIG_FILE}
+}
 
 function LOG()
 {

@@ -12,7 +12,7 @@ Clone this repository and install KAB with command `make install`
 
 ## Configuration
 One should provide mailbox, kernel source path, etc to KAB by edit variables in
-the head of kab-lib.sh. esmtp should be configured properly if you want to
+/etc/kdump-auto-bisect.conf. esmtp should be configured properly if you want to
 receive report via email. An esmtprc template is available in KAB's directory.
 
 ## Bisect
