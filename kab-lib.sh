@@ -10,36 +10,41 @@ REMOTE_LOG_PATH=''
 # remote host who will receive logs.
 LOG_HOST=''
 
+read_conf() {
+	# Following steps are applied in order: strip trailing comment, strip trailing space,
+	# strip heading space, match non-empty line, remove duplicated spaces between conf name and value
+	[ -f "$CONFIG_FILE" ] && sed -n -e "s/#.*//;s/\s*$//;s/^\s*//;s/\(\S\+\)\s*\(.*\)/\1 \2/p" $CONFIG_FILE
+}
+
 function check_config() {
 	while read config_opt config_val; do
-		config_val_striped=$(echo ${config_val} | sed -e 's/\(.*\)#.*/\1/')
 		case "$config_opt" in
 		\#* | "") ;;
 
 		KERNEL_SRC_PATH)
-			echo KERNEL_SRC_PATH set to ${config_val_striped}
-			KERNEL_SRC_PATH=${config_val_striped}
+			echo KERNEL_SRC_PATH set to ${config_val}
+			KERNEL_SRC_PATH=${config_val}
 			;;
 		LOG_PATH)
-			echo LOG_PATH set to ${config_val_striped}
-			LOG_PATH=${config_val_striped}
+			echo LOG_PATH set to ${config_val}
+			LOG_PATH=${config_val}
 			;;
 		LOG_HOST)
-			echo LOG_HOST set to ${config_val_striped}
-			LOG_HOST=${config_val_striped}
+			echo LOG_HOST set to ${config_val}
+			LOG_HOST=${config_val}
 			;;
 		REMOTE_LOG_PATH)
-			echo REMOTE_LOG_PATH set to ${config_val_striped}
-			REMOTE_LOG_PATH=${config_val_striped}
+			echo REMOTE_LOG_PATH set to ${config_val}
+			REMOTE_LOG_PATH=${config_val}
 			;;
 		REPORT_EMAIL)
-			echo REPORT_EMAIL set to ${config_val_striped}
-			REPORT_EMAIL=${config_val_striped}
+			echo REPORT_EMAIL set to ${config_val}
+			REPORT_EMAIL=${config_val}
 			;;
 		*) ;;
 
 		esac
-	done <${CONFIG_FILE}
+	done <<<"$(read_conf)"
 }
 
 function LOG() {
