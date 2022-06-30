@@ -42,7 +42,11 @@ if [ "$ret" == 1 ]; then
 	disable_service
 	LOG stoped
 else
-	kernel_compile_install
+	if [[ $INSTALL_KERNEL_BY == compile ]]; then
+		kernel_compile_install
+	elif [[ $INSTALL_KERNEL_BY == rpm ]]; then
+		install_kernel_rpm
+	fi
 	do_test
 fi
 cd -

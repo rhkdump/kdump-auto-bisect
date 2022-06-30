@@ -5,7 +5,8 @@ kdump, but the framework itself is general enough to be easily adopted to
 bisect other kernel projects.
 
 ## Preparation
-You need a stable computer system with kdump operational.
+You need a stable computer system with kdump operational and install wget if
+you choose to bisect kernel RPMs.
 
 ## Installation
 Clone this repository and install KAB with command `make install`

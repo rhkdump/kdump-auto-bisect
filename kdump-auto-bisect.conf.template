@@ -1,8 +1,17 @@
+# must choose between RPM|compile
+# INSTALL_KERNEL_BY compile|rpm
+
 # Path to the kernel source
-KERNEL_SRC_PATH /path/to/kernel/src/
+# if INSTALL_KERNEL_BY=compile, the repo is generated automatically
+KERNEL_SRC_PATH /root/kernel_src
+
+# kernel rpm list file
+# Mandatory if INSTALL_KERNEL_BY=rpm
+# KERNEL_RPM_LIST /path/to/rpm_list_file
 
 # Path to save logs
 LOG_PATH /boot/.kdump-auto-bisect.log
+
 
 # [optional]Remote host which is used to receive logs
 # LOG_HOST 10.66.128.10

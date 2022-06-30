@@ -4,8 +4,14 @@ source /usr/bin/kab-lib.sh
 
 check_config
 are_you_root
-is_git_repo
+if [[ $INSTALL_KERNEL_BY == compile ]]; then
+    is_git_repo
+fi
 initiate $1 $2
-kernel_compile_install
+if [[ $INSTALL_KERNEL_BY == compile ]]; then
+    kernel_compile_install
+elif [[ $INSTALL_KERNEL_BY == rpm ]]; then
+    install_kernel_rpm
+fi
 enable_service
 do_test
