@@ -16,8 +16,10 @@ LOG entering 1st kernel
 if [ -e "/boot/.kdump-auto-bisect.reboot" ]; then
 	LOG reboot-file detected
 	rm -f "/boot/.kdump-auto-bisect.reboot"
+	sync
 	LOG reboot-file removed
 	LOG triggering panic
+	sync
 	trigger_pannic
 	exit 0
 fi

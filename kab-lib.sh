@@ -158,6 +158,7 @@ function can_we_stop() {
 function do_test() {
 	# real test happens after reboot
 	LOG rebooting
+	sync
 	reboot
 }
 
