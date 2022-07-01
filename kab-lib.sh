@@ -213,7 +213,7 @@ function kernel_compile_install() {
 	#TODO threading according to /proc/cpuinfo
 	CURRENT_COMMIT=$(git log --oneline | cut -d ' ' -f 1 | head -n 1)
 	LOG building kernel: ${CURRENT_COMMIT}
-	yes $'\n' | make oldconfig &&
+	yes $'\n' | make oldconfig && sed -i "/rhel.pem/d" .config &&
 		make -j2 &&
 		make -j2 modules &&
 		make modules_install &&
