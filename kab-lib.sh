@@ -33,6 +33,10 @@ function check_config() {
 			echo LOG_PATH set to ${config_val}
 			LOG_PATH=${config_val}
 			;;
+		KDUMP_AUTO_BISECT_FINISHED_STR)
+			echo KDUMP_AUTO_BISECT_FINISHED_STR set to ${config_val}
+			KDUMP_AUTO_BISECT_FINISHED_STR=${config_val}
+			;;
 		LOG_HOST)
 			echo LOG_HOST set to ${config_val}
 			LOG_HOST=${config_val}
@@ -76,6 +80,14 @@ function check_config() {
 	if [[ -z $KERNEL_RPMS_DIR ]]; then
 		KERNEL_RPMS_DIR=/root/kernel_rpms
 	fi
+
+	if [[ -z $KDUMP_AUTO_BISECT_FINISHED_STR ]]; then
+		KDUMP_AUTO_BISECT_FINISHED_STR=KDUMP_AUTO_BISECT_FINISHED
+	fi
+}
+
+function log_to_console() {
+	echo $@ >/dev/ttyS0
 }
 
 function LOG() {
@@ -266,9 +278,11 @@ function can_we_stop() {
 	if [ -z $success_string ]; then
 		return 0 # not yet
 	else
+		log_to_console $KDUMP_AUTO_BISECT_FINISHED_STR
 		return 1 # yes, we can stop
 	fi
 }
+
 
 function do_test() {
 	# real test happens after reboot

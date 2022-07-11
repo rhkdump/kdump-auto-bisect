@@ -12,7 +12,7 @@ KERNEL_SRC_PATH /root/kernel_src
 # Path to save logs
 LOG_PATH /boot/.kdump-auto-bisect.log
 
-
+KDUMP_AUTO_BISECT_FINISHED_STR KDUMP_AUTO_BISECT_FINISHED
 # [optional]Remote host which is used to receive logs
 # LOG_HOST 10.66.128.10
 
