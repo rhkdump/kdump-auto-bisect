@@ -5,7 +5,7 @@ source /usr/bin/kab-lib.sh
 check_config
 LOG reboot complete
 # we don't care about 2nd kernel, just in case
-kernel=`which_kernel`
+kernel=$(which_kernel)
 if [ $kernel == 2 ]; then
 	LOG entering 2nd kernel
 	exit 0
