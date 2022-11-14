@@ -298,7 +298,18 @@ function trigger_pannic() {
 	# it is dangerous not to check kdump service status TODO
 	kdump_status=$(kdumpctl status)
 	LOG ${kdump_status}
-	sleep 5
+
+	count=0
+	while ! kdumpctl status; do
+		sleep 5
+		count=$((count + 5))
+		if [[ $count -gt 60 ]]; then
+			LOG "Something is wrong. Please fix it and trigger panic manually"
+			exit
+		fi
+	done
+
+	LOG ${kdump_status}
 	echo 1 >/proc/sys/kernel/sysrq
 	echo c >/proc/sysrq-trigger
 }
