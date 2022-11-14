@@ -213,14 +213,20 @@ function kernel_compile_install() {
 	#TODO threading according to /proc/cpuinfo
 	CURRENT_COMMIT=$(git log --oneline | cut -d ' ' -f 1 | head -n 1)
 	LOG building kernel: ${CURRENT_COMMIT}
-	yes $'\n' | make oldconfig && sed -i "/rhel.pem/d" .config &&
-		make -j2 &&
-		make -j2 modules &&
-		make modules_install &&
-		make install
+	yes $'\n' | make oldconfig && sed -i "/rhel.pem/d" .config
+
+	./scripts/config --set-str CONFIG_LOCALVERSION -${CURRENT_COMMIT}
+	yes $'\n' | make -j$(grep '^processor' /proc/cpuinfo | wc -l)
+	if ! make modules_install -j || ! make install; then
+		LOG "failed to build kernel"
+		exit
+	fi
+
 	LOG kernel building complete
 	# notice that next reboot should use new kernel
-	grubby --set-default-index=0
+	grubby --set-default /boot/vmlinuz-$(uname -r)
+	krelease=$(make kernelrelease)
+	reboot_to_kernel_once $krelease
 	touch "/boot/.kdump-auto-bisect.reboot"
 	LOG reboot file created
 }
@@ -261,6 +267,8 @@ success_string=''
 function detect_good_bad() {
 	if [[ $INSTALL_KERNEL_BY == rpm ]]; then
 		remove_kernel_rpm
+	else
+		/usr/bin/kernel-install remove $(make kernelrelease)
 	fi
 
 	if [ $(ls /var/crash | wc -l) -ne 0 ]; then
@@ -282,7 +290,6 @@ function can_we_stop() {
 		return 1 # yes, we can stop
 	fi
 }
-
 
 function do_test() {
 	# real test happens after reboot

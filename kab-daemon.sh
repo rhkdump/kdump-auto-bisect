@@ -20,6 +20,13 @@ if [ -e "/boot/.kdump-auto-bisect.reboot" ]; then
 	LOG reboot-file removed
 	LOG triggering panic
 	sync
+	if [[ $INSTALL_KERNEL_BY == compile ]]; then
+		cd $KERNEL_SRC_PATH
+		if [[ $(uname -r) != $(make kernelrelease) ]]; then
+			reboot
+		fi
+	fi
+
 	trigger_pannic
 	exit 0
 fi
