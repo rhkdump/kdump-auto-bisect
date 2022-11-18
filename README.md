@@ -41,8 +41,5 @@ compilation and installation precedure cannot satisfy your amazing systems.
 You may want to modify 'detect_good_bad' in kab-lib.sh if the existence of
 /var/crash/ is not your standard to judge good commits or bad ones.
 
-This script is crappy but somewhat comprehensive. You can update any part of it.
-You can send me your modification if you want to. Any other feedbacks are also
-welcome.
-
-<freeman.zhang1992@gmail.com>
+Credit for initial scripts from:
+Zhengyu Zhang <freeman.zhang1992@gmail.com>
