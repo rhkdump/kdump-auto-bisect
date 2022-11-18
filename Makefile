@@ -1,6 +1,4 @@
 install:
-	systemctl stop kdump-auto-bisect.service
-	systemctl disable kdump-auto-bisect.service
 	cp -f kdump-auto-bisect.service /etc/systemd/system/
 	cp -f `pwd`/kab.sh /usr/bin/kab.sh
 	cp -f `pwd`/kab-lib.sh /usr/bin/kab-lib.sh
