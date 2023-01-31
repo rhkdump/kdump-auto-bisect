@@ -1,6 +1,6 @@
 # KAB - Kdump Auto-bisect
 
-KAB is an automated git bisect tool to locate bad commit. It aims at debuging
+KAB is an automated git bisect tool to locate bad commit. It aims at debugging
 kdump, but the framework itself is general enough to be easily adopted to
 bisect other kernel projects.
 
@@ -31,13 +31,13 @@ User Mode) and disable the service called kdump-auto-bisect:
 
     systemctl disable kdump-auto-bisect
 
-## Want to get your hands wet
-There is no such thing as an automated debugger. Debuging involves human
-engagement. Alhough KAB is designed for most cases, you may want to get your
+## Want to get your hands dirty
+There is no such thing as an automated debugger. Debugging involves human
+engagement. Although KAB is designed for most cases, you may want to get your
 hands wet to customize KAB to suit your specific conditions. 
 
 You may want to modify 'kernel_compile_install' in kab-lib.sh if common
-compilation and installation precedure cannot satisfy your amazing systems.
+compilation and installation precede cannot satisfy your amazing systems.
 
 You may want to modify 'detect_good_bad' in kab-lib.sh if the existence of
 /var/crash/ is not your standard to judge good commits or bad ones.
