@@ -139,6 +139,11 @@ generate_git_repo_from_package_list() {
 	done <$_package_list
 }
 
+# install packages needed for kernel development
+install_kernel_devel() {
+	dnf --setopt=install_weak_deps=False install audit-libs-devel binutils-devel clang dwarves llvm perl python3-devel elfutils-devel java-devel ncurses-devel newt-devel numactl-devel pciutils-devel perl-generators xz-devel xmlto bison openssl-devel bc openssl gcc-plugin-devel cpio xz tar -qy
+}
+
 function initiate() {
 	if [ -e "/boot/.kdump-auto-bisect.undergo" ]; then
 		echo '''
@@ -186,6 +191,7 @@ There might be another operation undergoing, delete any file named
 	else
 		_good_commit=$1
 		_bad_commit=$2
+		install_kernel_devel
 	fi
 
 	LOG starting kab
