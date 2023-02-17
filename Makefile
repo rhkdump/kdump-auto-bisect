@@ -4,7 +4,6 @@ install:
 	cp -f `pwd`/kab-lib.sh /usr/bin/kab-lib.sh
 	cp -f `pwd`/kab-daemon.sh /usr/bin/kab-daemon.sh
 	chcon -t bin_t /usr/bin/kab-daemon.sh 
-	cp -f `pwd`/select-default-grub-entry.sh /usr/bin/select-default-grub-entry.sh
 	cp -f `pwd`/kdump-auto-bisect.conf.template /etc/kdump-auto-bisect.conf
 
 uninstall:
@@ -14,5 +13,4 @@ uninstall:
 	rm -f /usr/bin/kab.sh
 	rm -f /usr/bin/kab-lib.sh
 	rm -f /usr/bin/kab-daemon.sh
-	rm -f /usr/bin/select-default-grub-entry.sh
 	rm -f /etc/kdump-auto-bisect.conf

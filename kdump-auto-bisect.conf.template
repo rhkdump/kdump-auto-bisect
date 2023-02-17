@@ -12,7 +12,15 @@ KERNEL_SRC_PATH /root/kernel_src
 # Path to save logs
 LOG_PATH /boot/.kdump-auto-bisect.log
 
-KDUMP_AUTO_BISECT_FINISHED_STR KDUMP_AUTO_BISECT_FINISHED
+# Mandatory
+# REPRODUCER /root/reproducer.sh
+
+# Bisect kdump kernel issues
+BISECT_KDUMP NO
+
+# consider the commit as bad if we failed to switch to the new kernel
+BAD_IF_FAILED_TO_SWITCH YES
+
 # [optional]Remote host which is used to receive logs
 # LOG_HOST 10.66.128.10
 
