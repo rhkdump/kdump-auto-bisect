@@ -309,7 +309,7 @@ function success_report() {
         #send the kernel version to log
         LOG Found the version:  $res
 	# sending email
-	echo $success_string | esmtp $REPORT_EMAIL
+	echo $res | esmtp $REPORT_EMAIL
 
 }
 
