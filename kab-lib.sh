@@ -282,9 +282,11 @@ function detect_good_bad() {
 		success_string=$(git bisect good | grep "is the first bad commit")
 		rm -rf /var/crash/*
 		LOG remove /var/crash/*
+		LOG $(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
 	else
 		LOG bad
 		success_string=$(git bisect bad | grep "is the first bad commit")
+		LOG $(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
 	fi
 }
 
