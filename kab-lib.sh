@@ -305,8 +305,11 @@ function do_test() {
 }
 
 function success_report() {
+        res=$(git bisect log | grep "first bad commit" | tail -n 1)
+        #send the kernel version to log
+        LOG Found the version:  $res
 	# sending email
-	echo $success_string | esmtp $REPORT_EMAIL
+	echo $res | esmtp $REPORT_EMAIL
 
 }
 
