@@ -282,11 +282,9 @@ function detect_good_bad() {
 		success_string=$(git bisect good | grep "is the first bad commit")
 		rm -rf /var/crash/*
 		LOG remove /var/crash/*
-		LOG $(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
 	else
 		LOG bad
 		success_string=$(git bisect bad | grep "is the first bad commit")
-		LOG $(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
 	fi
 }
 
@@ -295,7 +293,6 @@ function can_we_stop() {
 		return 0 # not yet
 	else
 		log_to_console $KDUMP_AUTO_BISECT_FINISHED_STR
-		LOG Found--$(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
 		return 1 # yes, we can stop
 	fi
 }
@@ -308,10 +305,9 @@ function do_test() {
 }
 
 function success_report() {
+        res=$(git bisect log | grep "first bad commit" | tail -n 1)
         #send the kernel version to log
-        res=$(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
-        echo "found-----:$res---">>${LOG_PATH}
-        LOG Found the version:  $(git bisect log | grep "first bad commit" | tail -n 1 | cut -d ' ' -f 6)
+        LOG Found the version:  $res
 	# sending email
 	echo $success_string | esmtp $REPORT_EMAIL
 
