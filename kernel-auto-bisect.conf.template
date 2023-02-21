@@ -10,7 +10,7 @@ KERNEL_SRC_PATH /root/kernel_src
 # KERNEL_RPM_LIST /path/to/rpm_list_file
 
 # Path to save logs
-LOG_PATH /boot/.kdump-auto-bisect.log
+LOG_PATH /boot/.kernel-auto-bisect.log
 
 # Mandatory
 # REPRODUCER /root/reproducer.sh

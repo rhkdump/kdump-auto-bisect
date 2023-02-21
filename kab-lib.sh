@@ -1,12 +1,12 @@
 #!/bin/bash
-CONFIG_FILE='/etc/kdump-auto-bisect.conf'
+CONFIG_FILE='/etc/kernel-auto-bisect.conf'
 # path to kernel source directory
 KERNEL_SRC_PATH='/root/.kab_src'
 # mail-box to receive report
 REPORT_EMAIL=''
 LOG_PATH=''
 REMOTE_LOG_PATH=''
-INSTALL_KERNEL_BY=''
+BISECT_WHAT=''
 KERNEL_RPM_LIST=''
 KERNEL_RPMS_DIR='/root/kernel_rpms'
 BISECT_KDUMP=NO
@@ -25,17 +25,17 @@ check_config() {
 		eval "$config_opt"="$config_val"
 	done <<<"$(read_conf)"
 
-	if [[ $INSTALL_KERNEL_BY != rpm && $INSTALL_KERNEL_BY != compile ]]; then
-		echo INSTALL_KERNEL_BY must be chosen between rpm and compile
+	if [[ $BISECT_WHAT != NVR && $BISECT_WHAT != SOURCE ]]; then
+		echo BISECT_WHAT must be chosen between SOURCE and NVR
 		exit
-	elif [[ $INSTALL_KERNEL_BY == rpm ]]; then
+	elif [[ $BISECT_WHAT == NVR ]]; then
 		if [[ ! -f $KERNEL_RPM_LIST ]]; then
 			echo "$KERNEL_RPM_LIST doesn't exist"
 			exit 1
 		fi
 	fi
 
-	if [[ $INSTALL_KERNEL_BY == compile ]]; then
+	if [[ $BISECT_WHAT == SOURCE ]]; then
 		if [[ -z $KERNEL_SRC_PATH ]]; then
 			echo "You need to specify the KERNEL_SRC_PATH"
 			exit 1
@@ -95,8 +95,8 @@ generate_git_repo_from_package_list() {
 
 	git init
 	# configure name and email to make git happy
-	git config user.name kdump-auto-bisect
-	git config user.email kdump-auto-bisect
+	git config user.name kernel-auto-bisect
+	git config user.email kernel-auto-bisect
 	touch kernel_url kernel_release
 	git add kernel_url kernel_release
 	git commit -m "init" >/dev/null
@@ -124,17 +124,17 @@ call_func() {
 }
 
 initiate() {
-	if [ -e "/boot/.kdump-auto-bisect.undergo" ]; then
+	if [ -e "/boot/.kernel-auto-bisect.undergo" ]; then
 		echo '''
         
 There might be another operation undergoing, delete any file named
-'.kdump-auto-bisect.*' in /boot directory and run this script again.
+'.kernel-auto-bisect.*' in /boot directory and run this script again.
 
 '''
 		exit 1
 	fi
 
-	if [[ $INSTALL_KERNEL_BY == rpm ]]; then
+	if [[ $BISECT_WHAT == NVR ]]; then
 		dnf install git wget -qy
 		declare -A release_commit_map
 		generate_git_repo_from_package_list
@@ -158,7 +158,7 @@ There might be another operation undergoing, delete any file named
 	LOG starting kab
 
 	if [ -z "${LOG_HOST}" ]; then
-		echo "you can check logs in /boot/.kdump-auto-bisect.log"
+		echo "you can check logs in /boot/.kernel-auto-bisect.log"
 	else
 		echo "or at /var directory in ${LOG_HOST}"
 		ssh-keygen
@@ -168,7 +168,7 @@ There might be another operation undergoing, delete any file named
 
 	call_func before_bisect
 
-	touch "/boot/.kdump-auto-bisect.undergo"
+	touch "/boot/.kernel-auto-bisect.undergo"
 	git bisect reset
 	LOG bisect restarting
 	git bisect start
@@ -235,9 +235,9 @@ install_kernel_rpm() {
 }
 
 install_kernel() {
-	if [[ $INSTALL_KERNEL_BY == compile ]]; then
+	if [[ $BISECT_WHAT == SOURCE ]]; then
 		compile_install_kernel
-	elif [[ $INSTALL_KERNEL_BY == rpm ]]; then
+	elif [[ $BISECT_WHAT == NVR ]]; then
 		install_kernel_rpm
 	fi
 }
@@ -252,7 +252,7 @@ remove_kernel_rpm() {
 cleanup_kernel() {
 	local _kernel_release=$1
 
-	if [[ $INSTALL_KERNEL_BY == rpm ]]; then
+	if [[ $BISECT_WHAT == NVR ]]; then
 		remove_kernel_rpm "$_kernel_release"
 	else
 		/usr/bin/kernel-install remove "$_kernel_release"
@@ -261,7 +261,7 @@ cleanup_kernel() {
 
 success_string=''
 
-SWITCH_SUCESS_FILE=/boot/.kdump-auto-bisect.switched
+SWITCH_SUCESS_FILE=/boot/.kernel-auto-bisect.switched
 is_switch_sucessful() {
 	[[ -e $SWITCH_SUCESS_FILE ]]
 }
@@ -317,7 +317,7 @@ can_we_stop() {
 do_test() {
 	# real test happens after reboot
 	LOG rebooting
-	touch "/boot/.kdump-auto-bisect.reboot"
+	touch "/boot/.kernel-auto-bisect.reboot"
 	sync
 	reboot
 }
@@ -328,12 +328,12 @@ success_report() {
 }
 
 enable_service() {
-	systemctl enable kdump-auto-bisect
+	systemctl enable kernel-auto-bisect
 	LOG kab service enabled
 }
 
 disable_service() {
-	systemctl disable kdump-auto-bisect
+	systemctl disable kernel-auto-bisect
 	LOG kab service disabled
 }
 
@@ -377,7 +377,7 @@ get_kernel_release() {
 		exit 1
 	fi
 
-	if [[ $INSTALL_KERNEL_BY == compile ]]; then
+	if [[ $BISECT_WHAT == SOURCE ]]; then
 		_release=$(make kernelrelease)
 	else
 		_release=$(cat kernel_release)
