@@ -12,7 +12,7 @@ LOG_PATH='/boot/.kernel-auto-bisect.log'
 REMOTE_LOG_PATH=''
 BISECT_WHAT=''
 BISECT_KDUMP=NO
-BAD_IF_FAILED_TO_SWITCH=YES
+BAD_IF_FAILED_TO_REBOOT=YES
 # remote host who will receive logs.
 LOG_HOST=''
 
@@ -135,10 +135,10 @@ There might be another operation undergoing, delete any file named
 	if [[ $BISECT_WHAT == NVR ]]; then
 		dnf install wget python -qy
 		safe_cd "$KAB_WD"
-		python /usr/bin/generate_rhel_kernel_rpm_list.py $DISTRIBUTION "$(uname -m)" >"$KERNEL_RPM_LIST"
+		python /usr/bin/generate_rhel_kernel_rpm_list.py "$DISTRIBUTION" "$(uname -m)" >"$KERNEL_RPM_LIST"
 		declare -A release_commit_map
 		generate_git_repo_from_package_list
-		cd $KERNEL_SRC_PATH
+		safe_cd $KERNEL_SRC_PATH
 		mkdir $KERNEL_RPMS_DIR
 		_good_commit=${release_commit_map[$1]}
 		_bad_commit=${release_commit_map[$2]}
@@ -148,7 +148,7 @@ There might be another operation undergoing, delete any file named
 
 		if is_git_repo $KERNEL_SRC_PATH; then
 			read -p "$KERNEL_SRC_PATH exists, do you want to reuse it? y/n" ans
-			if [ $ans == "n" ]; then
+			if [ "$ans" == "n" ]; then
 				rm -rf "$KERNEL_SRC_PATH"
 			fi
 		fi
@@ -273,37 +273,49 @@ cleanup_kernel() {
 	fi
 }
 
-success_string=''
-
-SWITCH_SUCESS_FILE=/boot/.kernel-auto-bisect.switched
-is_switch_sucessful() {
-	[[ -e $SWITCH_SUCESS_FILE ]]
+TRY_REBOOT_FILE=/boot/.kernel-auto-bisect.reboot
+set_try_reboot_indicator() {
+	touch $TRY_REBOOT_FILE
 }
 
-clean_switch_status() {
-	rm -f $SWITCH_SUCESS_FILE
+did_we_try_reboot() {
+	[[ -e $TRY_REBOOT_FILE ]]
 }
 
-set_switch_status() {
+clean_try_reboot_indicator() {
+	rm -f "$TRY_REBOOT_FILE"
+}
+
+REBOOT_SUCCESS_FILE=/boot/.kernel-auto-bisect.rebooted
+is_reboot_successful() {
+	[[ -e $REBOOT_SUCCESS_FILE ]]
+}
+
+clean_reboot_status() {
+	rm -f $REBOOT_SUCCESS_FILE
+}
+
+set_reboot_status() {
 	local _release=$(get_kernel_release)
 
 	if [[ $(uname -r) == $_release ]]; then
-		touch $SWITCH_SUCESS_FILE
+		touch $REBOOT_SUCCESS_FILE
 	fi
 }
 
+success_string=''
 detect_good_bad() {
 	local _result=BAD
 	local _old_kernel_release=$(get_kernel_release)
 
-	if is_switch_sucessful; then
-		clean_switch_status
+	if is_reboot_successful; then
+		clean_reboot_status
 
 		if on_test; then
 			_result=GOOD
 		fi
 	else
-		if [[ $BAD_IF_FAILED_TO_SWITCH == NO ]]; then
+		if [[ $BAD_IF_FAILED_TO_REBOOT == NO ]]; then
 			LOG "Booted kernel is not the new kernel, abort!"
 			exit 1
 		fi
@@ -328,10 +340,10 @@ can_we_stop() {
 	fi
 }
 
-do_test() {
+try_reboot_to_new_kernel() {
 	# real test happens after reboot
 	LOG rebooting
-	touch "/boot/.kernel-auto-bisect.reboot"
+	set_try_reboot_indicator
 	sync
 	reboot
 }
@@ -372,10 +384,10 @@ trigger_pannic() {
 }
 
 # Trigger kernel panic only when
-#   1. Bisecting kdump kernel
+#   1. Bisecting kdump kernel bug
 #   2. The booted kernel is the new kernel
-panic_for_kdump() {
-	if [[ $BISECT_KDUMP == YES ]] && is_switch_sucessful; then
+try_panic_kernel() {
+	if [[ $BISECT_KDUMP == YES ]] && is_reboot_successful; then
 		LOG triggering panic
 		sync
 		trigger_pannic

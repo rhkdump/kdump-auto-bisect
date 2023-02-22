@@ -7,4 +7,4 @@ are_you_root
 initiate "$1" "$2"
 install_kernel
 enable_service
-do_test
+try_reboot_to_new_kernel

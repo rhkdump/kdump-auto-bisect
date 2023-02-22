@@ -18,8 +18,8 @@ LOG_PATH /boot/.kernel-auto-bisect.log
 # Bisect kdump kernel issues
 BISECT_KDUMP NO
 
-# consider the commit as bad if we failed to switch to the new kernel
-BAD_IF_FAILED_TO_SWITCH YES
+# consider the commit as bad if we failed to reboot to the new kernel
+BAD_IF_FAILED_TO_REBOOT YES
 
 # [optional]Remote host which is used to receive logs
 # LOG_HOST 10.66.128.10
