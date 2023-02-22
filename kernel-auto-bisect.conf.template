@@ -1,13 +1,13 @@
-# must choose between RPM|compile
-# INSTALL_KERNEL_BY compile|rpm
+# must choose between SOURCE and NVR
+# BISECT_WHAT SOURCE|NVR
 
 # Path to the kernel source
-# if INSTALL_KERNEL_BY=compile, the repo is generated automatically
-KERNEL_SRC_PATH /root/kernel_src
+# Mandatory when BISECT_WHAT=SOURCE
+# KERNEL_SRC_REPO https://gitlab.com/redhat/centos-stream/src/kernel/centos-stream-9.git
 
-# kernel rpm list file
-# Mandatory if INSTALL_KERNEL_BY=rpm
-# KERNEL_RPM_LIST /path/to/rpm_list_file
+# Distrubtion: choose among RHEL8, RHEL9 and C9S
+# Mandatory when BISECT_WHAT=NVR
+# DISTRIBUTION RHEL9
 
 # Path to save logs
 LOG_PATH /boot/.kernel-auto-bisect.log

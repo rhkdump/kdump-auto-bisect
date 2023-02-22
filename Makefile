@@ -3,6 +3,7 @@ install:
 	cp -f `pwd`/kab.sh /usr/bin/kab.sh
 	cp -f `pwd`/kab-lib.sh /usr/bin/kab-lib.sh
 	cp -f `pwd`/kab-daemon.sh /usr/bin/kab-daemon.sh
+	cp -f `pwd`/tools/generate_rhel_kernel_rpm_list.py /usr/bin/generate_rhel_kernel_rpm_list.py
 	chcon -t bin_t /usr/bin/kab-daemon.sh 
 	cp -f `pwd`/kernel-auto-bisect.conf.template /etc/kernel-auto-bisect.conf
 
@@ -13,4 +14,5 @@ uninstall:
 	rm -f /usr/bin/kab.sh
 	rm -f /usr/bin/kab-lib.sh
 	rm -f /usr/bin/kab-daemon.sh
+	rm -f /usr/bin/generate_rhel_kernel_rpm_list.py
 	rm -f /etc/kernel-auto-bisect.conf

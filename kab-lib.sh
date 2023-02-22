@@ -1,14 +1,16 @@
 #!/bin/bash
 CONFIG_FILE='/etc/kernel-auto-bisect.conf'
+# KAB working directory, used to store source code, downloaded rpm and etc.
+KAB_WD='/root/.kab'
 # path to kernel source directory
-KERNEL_SRC_PATH='/root/.kab_src'
+KERNEL_SRC_PATH="$KAB_WD/kernel_src"
+KERNEL_RPM_LIST="$KAB_WD/kernel_rpm_list"
+KERNEL_RPMS_DIR="$KAB_WD/kernel_rpms"
 # mail-box to receive report
 REPORT_EMAIL=''
-LOG_PATH=''
+LOG_PATH='/boot/.kernel-auto-bisect.log'
 REMOTE_LOG_PATH=''
 BISECT_WHAT=''
-KERNEL_RPM_LIST=''
-KERNEL_RPMS_DIR='/root/kernel_rpms'
 BISECT_KDUMP=NO
 BAD_IF_FAILED_TO_SWITCH=YES
 # remote host who will receive logs.
@@ -27,22 +29,17 @@ check_config() {
 
 	if [[ $BISECT_WHAT != NVR && $BISECT_WHAT != SOURCE ]]; then
 		echo BISECT_WHAT must be chosen between SOURCE and NVR
-		exit
-	elif [[ $BISECT_WHAT == NVR ]]; then
-		if [[ ! -f $KERNEL_RPM_LIST ]]; then
-			echo "$KERNEL_RPM_LIST doesn't exist"
-			exit 1
-		fi
+		exit 1
 	fi
 
 	if [[ $BISECT_WHAT == SOURCE ]]; then
-		if [[ -z $KERNEL_SRC_PATH ]]; then
-			echo "You need to specify the KERNEL_SRC_PATH"
+		if [[ -z $KERNEL_SRC_REPO ]]; then
+			echo "You need to specify the KERNEL_SRC_REPO"
 			exit 1
 		fi
-
-		if ! is_git_repo $KERNEL_SRC_PATH; then
-			echo $'$KERNEL_SRC_PATH is not a git repo.\n'
+	else
+		if [[ $DISTRIBUTION != RHEL8 && $DISTRIBUTION != RHEL9 && $DISTRIBUTION != C9S ]]; then
+			echo BISECT_WHAT must be chosen among RHEL8/RHEL9/C9S
 			exit 1
 		fi
 	fi
@@ -97,6 +94,7 @@ generate_git_repo_from_package_list() {
 	# configure name and email to make git happy
 	git config user.name kernel-auto-bisect
 	git config user.email kernel-auto-bisect
+
 	touch kernel_url kernel_release
 	git add kernel_url kernel_release
 	git commit -m "init" >/dev/null
@@ -135,16 +133,32 @@ There might be another operation undergoing, delete any file named
 	fi
 
 	if [[ $BISECT_WHAT == NVR ]]; then
-		dnf install git wget -qy
+		dnf install wget python -qy
+		safe_cd "$KAB_WD"
+		python /usr/bin/generate_rhel_kernel_rpm_list.py $DISTRIBUTION "$(uname -m)" >"$KERNEL_RPM_LIST"
 		declare -A release_commit_map
 		generate_git_repo_from_package_list
-		mkdir -p $KERNEL_RPMS_DIR
+		cd $KERNEL_SRC_PATH
+		mkdir $KERNEL_RPMS_DIR
 		_good_commit=${release_commit_map[$1]}
 		_bad_commit=${release_commit_map[$2]}
-
 	else
 		_good_commit=$1
 		_bad_commit=$2
+
+		if is_git_repo $KERNEL_SRC_PATH; then
+			read -p "$KERNEL_SRC_PATH exists, do you want to reuse it? y/n" ans
+			if [ $ans == "n" ]; then
+				rm -rf "$KERNEL_SRC_PATH"
+			fi
+		fi
+
+		if ! is_git_repo $KERNEL_SRC_PATH; then
+			# skip SSL certificate verification to workaround code.engineering.redhat.com
+			git -c http.sslVerify=false clone "$KERNEL_SRC_REPO" "$KERNEL_SRC_PATH"
+		fi
+
+		safe_cd "$KERNEL_SRC_PATH"
 
 		# only build kernel modules that are in-use or included in initramfs
 		lsinitrd /boot/initramfs-$(uname -r).img | sed -n -E "s/.*\/(\w+).ko.xz/\1/p" | xargs -n 1 modprobe
