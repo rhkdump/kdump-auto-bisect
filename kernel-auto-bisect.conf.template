@@ -1,15 +1,17 @@
-# must choose between SOURCE and NVR
-# BISECT_WHAT SOURCE|NVR
+# must choose between SOURCE and VERSION
+#  - SOURCE: build kernel from source, you need to specify KERNEL_SRC_REPO when BISECT_WHAT=SOURCE
+#  - VERSION: use built kernel packages; you need to specify DISTRIBUTION when BISECT_WHAT=SOURCE
+# BISECT_WHAT SOURCE|VERSION
 
-# Path to the kernel source
+# Path to the kernel source repo
 # Mandatory when BISECT_WHAT=SOURCE
 # KERNEL_SRC_REPO https://gitlab.com/redhat/centos-stream/src/kernel/centos-stream-9.git
 
-# Distrubtion: choose among RHEL8, RHEL9 and C9S
-# Mandatory when BISECT_WHAT=NVR
+# DISTRIBUTION: choose among RHEL8, RHEL9 and C9S
+# Mandatory when BISECT_WHAT=VERSION
 # DISTRIBUTION RHEL9
 
-# Path to save logs
+# Path to bisect log file
 LOG_PATH /boot/.kernel-auto-bisect.log
 
 # Mandatory

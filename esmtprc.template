@@ -1,4 +1,4 @@
-identity kdump-auto-bisect
+identity kernel-auto-bisect
 	hostname =  smtp.corp.xxx.com:25
 	username = ""
 	password = ""

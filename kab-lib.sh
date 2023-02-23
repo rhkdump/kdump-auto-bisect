@@ -27,8 +27,8 @@ check_config() {
 		eval "$config_opt"="$config_val"
 	done <<<"$(read_conf)"
 
-	if [[ $BISECT_WHAT != NVR && $BISECT_WHAT != SOURCE ]]; then
-		echo BISECT_WHAT must be chosen between SOURCE and NVR
+	if [[ $BISECT_WHAT != VERSION && $BISECT_WHAT != SOURCE ]]; then
+		echo BISECT_WHAT must be chosen between SOURCE and VERSION
 		exit 1
 	fi
 
@@ -132,7 +132,7 @@ There might be another operation undergoing, delete any file named
 		exit 1
 	fi
 
-	if [[ $BISECT_WHAT == NVR ]]; then
+	if [[ $BISECT_WHAT == VERSION ]]; then
 		dnf install wget python -qy
 		safe_cd "$KAB_WD"
 		python /usr/bin/generate_rhel_kernel_rpm_list.py "$DISTRIBUTION" "$(uname -m)" >"$KERNEL_RPM_LIST"
@@ -251,7 +251,7 @@ install_kernel_rpm() {
 install_kernel() {
 	if [[ $BISECT_WHAT == SOURCE ]]; then
 		compile_install_kernel
-	elif [[ $BISECT_WHAT == NVR ]]; then
+	elif [[ $BISECT_WHAT == VERSION ]]; then
 		install_kernel_rpm
 	fi
 }
@@ -266,7 +266,7 @@ remove_kernel_rpm() {
 cleanup_kernel() {
 	local _kernel_release=$1
 
-	if [[ $BISECT_WHAT == NVR ]]; then
+	if [[ $BISECT_WHAT == VERSION ]]; then
 		remove_kernel_rpm "$_kernel_release"
 	else
 		/usr/bin/kernel-install remove "$_kernel_release"
