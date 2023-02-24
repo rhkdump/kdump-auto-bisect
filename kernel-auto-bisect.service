@@ -1,5 +1,5 @@
 [Unit]
-Description=kdump-auto-bisect daemon
+Description=kernel-auto-bisect daemon
 After=network.target network-online.target remote-fs.target basic.target kdump.service 
 DefaultDependencies=no
 

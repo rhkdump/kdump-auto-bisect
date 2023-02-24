@@ -28,15 +28,19 @@ def get_kernel_versions():
 
 
 if len(sys.argv) < 3:
-    rhel_version = input("RHEL version 8/9?\n")
+    rhel_version = input("Distribution RHEL8/RHEL9/C9S?\n")
     arch = input("Architecture:?")
 else:
     rhel_version = sys.argv[1]
     arch = sys.argv[2]
 
-version_map = {"8": "4.18.0", "9": "5.14.0"}
+version_map = {"RHEL8": "4.18.0", "RHEL9": "5.14.0", "C9S": "5.14.0"}
 version = version_map[rhel_version]
-base_url = f"http://download.devel.redhat.com/brewroot/vol/rhel-{rhel_version}/packages/kernel/{version}"
+if rhel_version == "C9s":
+    base_url = f"https://kojihub.stream.centos.org/kojifiles/packages/kernel/5.14.0/"
+else:
+    rhel_version=rhel_version[-1]
+    base_url = f"http://download.devel.redhat.com/brewroot/vol/rhel-{rhel_version}/packages/kernel/{version}"
 
 for minor in get_kernel_versions():
     release_version = f'{version}-{minor}'

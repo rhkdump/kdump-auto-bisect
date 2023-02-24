@@ -1,0 +1,35 @@
+# must choose between SOURCE and VERSION
+#  - SOURCE: build kernel from source, you need to specify KERNEL_SRC_REPO when BISECT_WHAT=SOURCE
+#  - VERSION: use built kernel packages; you need to specify DISTRIBUTION when BISECT_WHAT=SOURCE
+# BISECT_WHAT SOURCE|VERSION
+
+# Path to the kernel source repo
+# Mandatory when BISECT_WHAT=SOURCE
+# KERNEL_SRC_REPO https://gitlab.com/redhat/centos-stream/src/kernel/centos-stream-9.git
+
+# DISTRIBUTION: choose among RHEL8, RHEL9 and C9S
+# Mandatory when BISECT_WHAT=VERSION
+# DISTRIBUTION RHEL9
+
+# Path to bisect log file
+LOG_PATH /boot/.kernel-auto-bisect.log
+
+# Mandatory
+# REPRODUCER /root/reproducer.sh
+
+# Bisect kdump kernel issues
+BISECT_KDUMP NO
+
+# consider the commit as bad if we failed to reboot to the new kernel
+BAD_IF_FAILED_TO_REBOOT YES
+
+# [optional]Remote host which is used to receive logs
+# LOG_HOST 10.66.128.10
+
+# [optional]Path to save logs on the remote host
+# REMOTE_LOG_PATH /var/.kdump-auto-bisect.log
+
+# [optional]The mailbox to receive report. esmtprc should also
+# be set up properly.
+# REPORT_EMAIL example@redhat.com
+
