@@ -336,6 +336,11 @@ can_we_stop() {
 	if [ -z "$success_string" ]; then
 		return 1 # not yet
 	else
+		# use git bisect log to get more readable output so the commit
+		# subject is also contained
+		success_string=$(git bisect log | grep "first bad commit")
+		# removing starting "# "
+		success_string=${success_string:2}
 		return 0 # yes, we can stop
 	fi
 }
